@@ -22,14 +22,16 @@ function zaw-src-git-status() {
       zaw-src-git-status-reset \
       zaw-src-git-status-checkout \
       zaw-src-git-status-edit \
-      zaw-src-git-status-rm)
+      zaw-src-git-status-rm \
+      zaw-src-git-status-delete-file)
     act_descriptions=( \
       "add" \
       "add -p" \
       "reset" \
       "checkout" \
       "edit" \
-      "rm")
+      "rm" \
+      "delete file")
     src_opts=()
 }
 
@@ -73,5 +75,13 @@ function zaw-src-git-status-rm() {
   BUFFER="git rm '$git_base$f_path'"
   zle accept-line
 }
+
+function zaw-src-git-status-delete-file() {
+  local f_path=${1#(\?\? | M |M  |A  )}
+  local git_base="$(git rev-parse --show-cdup)"
+  BUFFER="rm '$git_base$f_path'"
+  zle accept-line
+}
+
 
 zaw-register-src -n git-status zaw-src-git-status
