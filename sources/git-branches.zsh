@@ -8,8 +8,8 @@ function zaw-src-git-branches() {
         : ${(A)cand_descriptions::=${${(f)${branches_list}}#refs/(remotes|heads|tags)/}}
     fi
     actions=( \
-        zaw-src-git-branches-checkout \
         zaw-src-git-branches-simple-checkout \
+        zaw-src-git-branches-checkout \
         zaw-callback-append-to-buffer \
         zaw-src-git-branches-merge \
         zaw-src-git-branches-merge-rebase \
@@ -25,8 +25,8 @@ function zaw-src-git-branches() {
         zaw-src-git-branches-delete \
         zaw-src-git-branches-delete-force)
     act_descriptions=(
-        "check out locally" \
         "check out" \
+        "check out locally" \
         "append to edit buffer" \
         "merge" \
         "merge rebase" \
