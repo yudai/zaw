@@ -17,6 +17,7 @@ function zaw-src-git-status() {
     fi
 
     actions=( \
+      zaw-src-git-status-append-to-buffer \
       zaw-src-git-status-add \
       zaw-src-git-status-add-p \
       zaw-src-git-status-reset \
@@ -25,6 +26,7 @@ function zaw-src-git-status() {
       zaw-src-git-status-rm \
       zaw-src-git-status-delete-file)
     act_descriptions=( \
+      "append to buffer" \
       "add" \
       "add -p" \
       "reset" \
@@ -33,6 +35,12 @@ function zaw-src-git-status() {
       "rm" \
       "delete file")
     src_opts=()
+}
+
+function zaw-src-git-status-append-to-buffer () {
+  local f_path=${1##?* }
+  local git_base="$(git rev-parse --show-cdup)"
+  LBUFFER+="'$git_base$f_path'"
 }
 
 function zaw-src-git-status-add() {
