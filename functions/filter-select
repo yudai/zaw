@@ -68,6 +68,9 @@
 #     -w
 #       show search pattern in place
 #
+#     -b
+#       force match the pattern from the beginning of lines
+#
 #
 # default key binds in filterselect:
 #   enter:              accept-line (update $reply and return)
@@ -142,7 +145,7 @@ function filter-select() {
 
     integer i bottom_lines cursor_line=1 display_head_line=1 cand_num disp_num ii num_desc
     integer offset display_bottom_line selected_num rev=0 ret=0 enum=0
-    integer mark_idx markable=0 is_marked inplace=1
+    integer mark_idx markable=0 is_marked inplace=1 force_match_beginning=1
 
     local hi_selected hi_matched hi_marked hi_title hi_error
     zstyle -s ':filter-select:highlight' selected hi_selected || hi_selected='standout'
@@ -163,7 +166,7 @@ function filter-select() {
     descriptions=()
     exit_wigdets=(accept-line accept-search accept-pattern  send-break)
 
-    while getopts 't:A:d:D:nrme:s:iw' opt; do
+    while getopts 't:A:d:D:nrme:s:iwb' opt; do
         case "${opt}" in
             t)
                 title="${OPTARG}"
@@ -207,6 +210,9 @@ function filter-select() {
                 ;;
             w)
                 inplace=0
+                ;;
+            b)
+                force_match_beginning=0
                 ;;
         esac
     done
@@ -631,6 +637,10 @@ function _filter-select-buffer-words() {
         # "^abc" -> "(#s)abc",
         # ("a^bc" should be held on, the beginning's "^" only be considered)
         : ${(A)a::=${a/(#m)(#s)\^?##/(#s)${MATCH#\^}}}
+
+        if (( $force_match_beginning == 0 )); then
+            : ${a::=(#s)${a}}
+        fi
 
         # "xyz$" -> "xyz(#e)",
         # ("x$yz" shoud be held on, the ending's "$" only be considered)
