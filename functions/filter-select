@@ -65,6 +65,9 @@
 #     -i
 #       only initialize `filterselect` keymaps.
 #
+#     -w
+#       show search pattern in place
+#
 #
 # default key binds in filterselect:
 #   enter:              accept-line (update $reply and return)
@@ -139,7 +142,7 @@ function filter-select() {
 
     integer i bottom_lines cursor_line=1 display_head_line=1 cand_num disp_num ii num_desc
     integer offset display_bottom_line selected_num rev=0 ret=0 enum=0
-    integer mark_idx markable=0 is_marked
+    integer mark_idx markable=0 is_marked inplace=1
 
     local hi_selected hi_matched hi_marked hi_title hi_error
     zstyle -s ':filter-select:highlight' selected hi_selected || hi_selected='standout'
@@ -158,9 +161,9 @@ function filter-select() {
 
     candidates=()
     descriptions=()
-    exit_wigdets=(accept-line accept-search send-break)
+    exit_wigdets=(accept-line accept-search accept-pattern  send-break)
 
-    while getopts 't:A:d:D:nrme:s:i' opt; do
+    while getopts 't:A:d:D:nrme:s:iw' opt; do
         case "${opt}" in
             t)
                 title="${OPTARG}"
@@ -201,6 +204,10 @@ function filter-select() {
             i)
                 # do nothing. only keybinds are initialized
                 return
+                ;;
+            w)
+                inplace=0
+                ;;
         esac
     done
 
@@ -243,7 +250,10 @@ function filter-select() {
     BUFFER="$initbuffer"
 
     # display original edit buffer's contants as PREDISPLAY
-    PREDISPLAY="${orig_predisplay}${orig_lbuffer}${orig_rbuffer}${orig_postdisplay}${nl}"
+    PREDISPLAY="${orig_predisplay}"
+    if (( $inplace != 0 )); then
+        PREDISPLAY+="${orig_lbuffer}${orig_rbuffer}${orig_postdisplay}${nl}"
+    fi
 
     # re-calculate region_highlight
     init_region_highlight=()
@@ -257,7 +267,9 @@ function filter-select() {
     done
 
     # prompt for filter-select
-    PREDISPLAY+="filter: "
+    if (( $inplace != 0 )); then
+        PREDISPLAY+="filter: "
+    fi
 
     # clear strings displayed below the command line
     zle -Rc
@@ -489,7 +501,14 @@ function filter-select() {
         fi
     done
 
-    if [[ -z "${key}" && -z "${bounds}" ]]; then
+    if (( $inplace == 0 )) &&
+        ([[ -z "${key}" && -z "${bounds}" ]] || [[ "${bounds}" == send-break ]]); then
+        # ^G and ^G with inplace
+        reply=("accept-pattern" "$BUFFER")
+        reply_marked=()
+        ret=0
+
+    elif [[ -z "${key}" && -z "${bounds}" ]]; then
         # ^C
         reply=()
         reply_marked=()

@@ -151,6 +151,9 @@ function zaw() {
             accept-search)
                 action="$(zaw-action "${name}" 2)"
                 ;;
+            accept-pattern)
+                LBUFFER=$selected
+                ;;
             select-action)
                 if [[ ${#actions} -eq 1 ]]; then
                     action="$(zaw-action "${name}" 1)"
